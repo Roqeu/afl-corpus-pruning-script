@@ -7,6 +7,7 @@ from sys import argv
 # Used to handle directory content, path and deletion when finished
 from os import listdir, scandir, path, rmdir
 
+
 #---------------Handles moving files back to parent directory---------------#
 # Note: afl expects 1 corpus directory of seed files, this function returns all minimised files to main corpus directory
 def copy_back(corpus_directory, parent_directory):
@@ -25,9 +26,12 @@ def copy_back(corpus_directory, parent_directory):
     # Deletes now empty subdirectory
     rmdir(corpus_directory)
 
+
 # Minimise every test case in directory
 def minimise(corpus_directory, parent_directory, tmin_call):
 
+    # Stores the amount of files to be minimised
+    total_files = len(listdir(corpus_directory))
     # Stores an iterator of DirEntry objects
     seed_files = scandir(corpus_directory)
     # Initialises counter
@@ -49,27 +53,23 @@ def minimise(corpus_directory, parent_directory, tmin_call):
 
     # Moves all minimised seed files back to main corpus file    
     copy_back(corpus_directory, parent_directory)
-    # Informs user of completion
-    print('Tmin process completed! Have a nice day! :)')
 
 
 #---------------Sets up tmin call for each mode---------------#
 def full(target):  
 
     # Return tmin call for full mode
-    return ['afl-tmin', '-m', '500', '-i', '', '-o', '', target, 'full', '-p', '/dev/null', '@@'])
+    return ['afl-tmin', '-m', '500', '-i', '', '-o', '', target, 'full', '-p', '/dev/null', '@@']
 
 def sim(target): 
 
     # Return tmin call for sim mode
     return ['afl-tmin', '-m', '500',  '-i', '', '-o', '', target, 'sim', '-T', '500', '-s', '-t', '/dev/null', '-f', 'svg', '@@']
 
-
 def validate(target):  
 
     # Return tmin call for validate mode
     return ['afl-tmin', '-m', '500',  '-i', '', '-o', '', target, 'validate', '-d', '/dev/null', '-f', 'svg', '@@']
-
 
 
 #---------------Parsing input---------------#
