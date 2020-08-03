@@ -76,7 +76,7 @@ def minimise_tests(corpus_dir, mode):
 # Returns template for computation minimisation
 def full(input_dir, output_dir, target):
 
-    print('Starting full_corpus minimisation')
+    print('\nStarting full_corpus minimisation\n')
     # Sets path to full_corpus in input_directory
     input_corpus = path.join(input_dir, 'full_corpus')
     # Sets path to full_corpus in output_directory
@@ -103,13 +103,13 @@ def full(input_dir, output_dir, target):
             # Waits 5 minutes then checks running process to find complete minimisation scripts
             sleep(3)
 
-        print('full_corpus minimisation complete! Have a nice day! :)')
+        print('\nfull_corpus minimisation complete! Have a nice day! :)\n')
         sim(input_dir, output_dir, target)
 
 # Returns template for simulation minimisation
 def sim(input_dir, output_dir, target):
 
-    print('Starting sim_corpus minimisation')
+    print('\nStarting sim_corpus minimisation\n')
     # Sets path to sim_corpus in input_directory
     input_corpus = path.join(input_dir, 'sim_corpus')
     # Sets path to sim_corpus in output_directory and creates it
@@ -136,13 +136,13 @@ def sim(input_dir, output_dir, target):
             # Waits 5 minutes then checks running process to find complete minimisation scripts
             sleep(3)
 
-        print('sim_corpus minimisation complete! Have a nice day! :)')
+        print('\nsim_corpus minimisation complete! Have a nice day! :)\n')
         validate(input_dir, output_dir, target)
 
 # Returns template for validation minimisation
 def validate(input_dir, output_dir, target):
 
-    print('Starting validate_corpus minimisation')
+    print('\nStarting validate_corpus minimisation\n')
     # Sets path to validate_corpus in input_directory
     input_corpus = path.join(input_dir, 'validate_corpus')
     # Sets path to validate_corpus in output_directory and creates it
