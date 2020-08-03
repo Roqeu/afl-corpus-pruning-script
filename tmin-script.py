@@ -53,6 +53,7 @@ def minimise(corpus_directory, parent_directory, tmin_call):
 
     # Moves all minimised seed files back to main corpus file    
     copy_back(corpus_directory, parent_directory)
+    print('Tmin process complete, have a nice day!')
 
 
 #---------------Sets up tmin call for each mode---------------#
