@@ -5,7 +5,7 @@ from subprocess import Popen, run
 # Used to move files to new directory
 from shutil import move
 # Used to handle directory content, path and deletion when finished
-from os import listdir, mkdir, path
+from os import listdir, mkdir, path, getcwd
 # Used to get number of cores on machine
 import multiprocessing as mp
 # Used to wait between tmin-script checks
@@ -60,6 +60,8 @@ def minimise_tests(corpus_dir, mode):
     dir_list = split_corpus(corpus_dir)
     # Stores a list of running terminals
     running_procs = []
+    # Finds location of tmin-script (assumes it is the pwd)
+    tmin_script_location = path.join(getcwd(), 'tmin-script.py')
     
     # Opens new terminal window to run tmin script
     # Note: new terminals opened as tmin runs 1 process per terminal and will use 1 core per process 
@@ -67,9 +69,7 @@ def minimise_tests(corpus_dir, mode):
     for d in dir_list:
         # Calls tmin script with relevant bigrapher mode
         # Note: subprocess.call is used instead of subprocess.run to allow the script to control the creation of new terminals
-        running_procs.append(Popen(['gnome-terminal', '-e', 'python3 /home/r0qu3/tmin-script.py ' + corpus_dir + ' ' + d  + ' ' + target + mode]))
-
-    return running_procs
+        running_procs.append(Popen(['gnome-terminal', '-e', 'python3 ' + tmin_script_location + ' ' + corpus_dir + ' ' + d  + ' ' + target + mode]))
 
             
 # ----------------Bigrapher arguments for each mode----------------#
@@ -92,27 +92,19 @@ def full(input_dir, output_dir, target):
     # Minimised corpus size to minimum number of relevant files
     run(['afl-cmin', '-m', '500',  '-i', input_corpus, '-o', output_corpus, target, 'full', '-p', '/dev/null', '@@'], check=True)
     # Starts tmin process
-    running_procs = minimise_tests(output_corpus, ' full')
+    corpus_size = len(listdir(output_corpus))
+    minimise_tests(output_corpus, ' full')
 
     # If user did not select to only run 1 mode, call next function in sequence when current tmin is finished
     if complete_run:
-
+        
         # Won't allow method to finish until all tmin-script processes are finished
-        while len(running_procs) != 0:
+        while len(listdir(output_corpus)) != corpus_size:
             # Waits 5 minutes then checks running process to find complete minimisation scripts
-            sleep(20)
-            # Loops through processes in running_processes list
-            for proc in running_procs:
-                # If process is finished, remove from list
-                if proc.poll is not None: # If process is running .poll should return None
-
-                    running_procs.remove(proc)
+            sleep(3)
 
         print('full_corpus minimisation complete! Have a nice day! :)')
         sim(input_dir, output_dir, target)
-    else:
-
-        print('full_corpus minimisation complete! Have a nice day! :)')
 
 # Returns template for simulation minimisation
 def sim(input_dir, output_dir, target):
@@ -133,26 +125,19 @@ def sim(input_dir, output_dir, target):
     # Minimised corpus size to minimum number of relevant files
     run(['afl-cmin', '-m', '500', '-i', input_corpus, '-o', output_corpus, target, 'sim', '-T', '500', '-s', '-t', '/dev/null', '-f', 'svg', '@@'], check=True)
     # Starts tmin process
-    running_procs = minimise_tests(output_corpus, ' sim')
+    corpus_size = len(listdir(output_corpus))
+    minimise_tests(output_corpus, ' sim')
 
     # If user did not select to only run 1 mode, call next function in sequence when current tmin is finished
     if complete_run:
 
-        # Won't allow method to finish untill all tmin-script processes are finished
-        while running_procs:
+        # Won't allow method to finish until all tmin-script processes are finished
+        while len(listdir(output_corpus)) != corpus_size:
             # Waits 5 minutes then checks running process to find complete minimisation scripts
-            sleep(20)
-            # Loops through processes in running_processes list
-            for proc in running_procs:
-                # If process is finished, remove from list
-                if proc.poll is not None: # If process is running .poll should return None
-
-                    running_procs.remove(proc)
+            sleep(3)
 
         print('sim_corpus minimisation complete! Have a nice day! :)')
         validate(input_dir, output_dir, target)
-    else:
-        print('sim_corpus minimisation complete! Have a nice day! :)')
 
 # Returns template for validation minimisation
 def validate(input_dir, output_dir, target):
@@ -174,7 +159,6 @@ def validate(input_dir, output_dir, target):
     run(['afl-cmin', '-m', '500', '-i', input_corpus, '-o', output_corpus, target, 'validate', '-d', '/dev/null', '-f', 'svg', '@@'], check=True)
     # Starts tmin process
     minimise_tests(output_corpus, ' validate')
-    print('validate_corpus minimisation complete! Have a nice day! :)')
 
 
 # ----------------Argument Parsing----------------#
@@ -201,7 +185,7 @@ else:
         # Checks for and calls cmin function for relevant Bigrapher mode
         if (mode == 'full'):
 
-            full(input_dir, output_dir, target, mode)
+            full(input_dir, output_dir, target)
         elif (mode == 'sim'):
 
             sim(input_dir, output_dir, target)
