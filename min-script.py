@@ -17,38 +17,31 @@ complete_run = True
 # ----------------Directory creation and tmin-script activation----------------#
 # Splits large corpus into smaller directories and returns a list of new directories
 def split_corpus(corpus_dir):
-    ### Splits up files into smaller directories for tmin-script ###
-    # Creates an list of all files in the corpus directory
-    corpus_files = listdir(corpus_dir)
-    # Stores number of threads to be made (will use all cores on CPU)
-    threads = mp.cpu_count()
 
+    corpus_files = listdir(corpus_dir)
+    threads = mp.cpu_count()
     # Stores the number of files to be stored each sub directory
     n = len(corpus_files) / threads
-    # Converts n to int
     no_of_seeds = int(n)
+
     # If n is a decimal, add 1 to no_of_seeds so there are no remaining files
-    # Note: this means there will be less files in the last directory so that all files are included
     if n != no_of_seeds:
         no_of_seeds += 1
+
     # Creates a list to store all new directories
     dir_list = []
 
-    # Creates a directory per thread
     for i in range(0, threads):
 
         # Creates new directory
         new_dir = path.join(corpus_dir, 'tmin' + str(i))
         mkdir(new_dir)
-        # Adds new directory to directory list
         dir_list.append(new_dir)
 
-        # Moves fraction of files (no_of_seeds or number of remaining files) into new directory
         for i in range(0, min(no_of_seeds, len(corpus_files))):
 
             # Creates a path to move the seed file to and removes seed file from list
             old_dir = path.join(corpus_dir, corpus_files.pop())
-            # Moves the seed file
             move(old_dir, new_dir)
     
     return dir_list
@@ -63,12 +56,9 @@ def minimise_tests(corpus_dir, mode):
     # Finds location of tmin-script (assumes it is the pwd)
     tmin_script_location = path.join(getcwd(), 'tmin-script.py')
     
-    # Opens new terminal window to run tmin script
-    # Note: new terminals opened as tmin runs 1 process per terminal and will use 1 core per process 
-    # (this how the script acheives asynchronus tmin operations)
+    # Runs tmin script
     for d in dir_list:
         # Calls tmin script with relevant bigrapher mode
-        # Note: subprocess.call is used instead of subprocess.run to allow the script to control the creation of new terminals
         running_procs.append(Popen(['gnome-terminal', '-e', 'python3 ' + tmin_script_location + ' ' + corpus_dir + ' ' + d  + ' ' + target + mode]))
 
             
@@ -101,7 +91,7 @@ def full(input_dir, output_dir, target):
         # Won't allow method to finish until all tmin-script processes are finished
         while len(listdir(output_corpus)) != corpus_size:
             # Waits 5 minutes then checks running process to find complete minimisation scripts
-            sleep(3)
+            sleep(300)
 
         print('\nfull_corpus minimisation complete! Have a nice day! :)\n')
         sim(input_dir, output_dir, target)
